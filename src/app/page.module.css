@@ -97,6 +97,7 @@
   align-items: center;
   justify-content: center;
   border-right: 1px solid var(--border-light);
+  background: #f1f5f9; /* New default background for all day columns */
   position: relative;
   transition: background 0.1s;
 }
@@ -121,12 +122,16 @@
 
 /* Today highlight */
 .today {
-  background: #f8f9fa;
+  background: #ffffff !important; /* Stand out with white background */
+}
+
+/* Specific styling for the today date in header */
+.headerCell.today {
   color: #000000 !important;
   font-weight: 800 !important;
 }
 
-.today::after {
+.headerCell.today::after {
   content: '';
   position: absolute;
   top: 0;

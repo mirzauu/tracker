@@ -60,18 +60,15 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
   // Scroll to current day on mount and when viewDate changes
   React.useEffect(() => {
     const timeout = setTimeout(() => {
-      const grid = document.getElementById('tracker-grid');
       const todayElement = document.getElementById('today-cell');
-      if (grid && todayElement) {
-        // Calculate center position
-        const gridRect = grid.getBoundingClientRect();
-        const todayRect = todayElement.getBoundingClientRect();
-        const scrollAmount = (todayRect.left + grid.scrollLeft) - gridRect.left - (gridRect.width / 2) + (todayRect.width / 2);
-        grid.scrollTo({ left: scrollAmount, behavior: 'smooth' });
-      } else if (grid) {
-        grid.scrollTo({ left: 0, behavior: 'smooth' });
+      if (todayElement) {
+        todayElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          inline: 'center', 
+          block: 'nearest' 
+        });
       }
-    }, 100);
+    }, 200); // Slightly longer delay to ensure full render
     return () => clearTimeout(timeout);
   }, [viewDate]);
 
