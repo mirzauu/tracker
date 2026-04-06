@@ -45,15 +45,15 @@ export default function GoalsPage() {
     categoryId: null
   });
 
-  useEffect(() => {
-    refreshData();
-  }, []);
-
   const refreshData = async () => {
     const [goalsData, catsData] = await Promise.all([getGoals(), getCategories()]);
     setGoals(goalsData as unknown as Goal[]);
     setCategories(catsData as unknown as Category[]);
   };
+
+  useEffect(() => {
+    refreshData();
+  }, []);
 
   const handleCreate = async () => {
     await createGoal(formData);

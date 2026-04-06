@@ -57,6 +57,24 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
   const todayObj = new Date();
   todayObj.setHours(0, 0, 0, 0);
 
+  // Scroll to current day on mount and when viewDate changes
+  React.useEffect(() => {
+    const timeout = setTimeout(() => {
+      const grid = document.getElementById('tracker-grid');
+      const todayElement = document.getElementById('today-cell');
+      if (grid && todayElement) {
+        // Calculate center position
+        const gridRect = grid.getBoundingClientRect();
+        const todayRect = todayElement.getBoundingClientRect();
+        const scrollAmount = (todayRect.left + grid.scrollLeft) - gridRect.left - (gridRect.width / 2) + (todayRect.width / 2);
+        grid.scrollTo({ left: scrollAmount, behavior: 'smooth' });
+      } else if (grid) {
+        grid.scrollTo({ left: 0, behavior: 'smooth' });
+      }
+    }, 100);
+    return () => clearTimeout(timeout);
+  }, [viewDate]);
+
   // Alarm checker effect
   React.useEffect(() => {
     const checkReminders = () => {
@@ -283,15 +301,16 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
         </div>
       </header>
 
-      <div className={styles.grid}>
-        <div className={`${styles.row} ${styles.headerRow}`}>
+      <div id="tracker-grid" className={styles.grid}>
+        <div className={styles.gridInner}>
+          <div className={`${styles.row} ${styles.headerRow}`}>
           <div className={styles.goalName}>Goals</div>
           {Array.from({ length: DAYS_IN_MONTH }, (_, i) => i + 1).map((day) => {
             const dateInMonth = new Date(currentYear, currentMonth, day);
             const isWeekEnd = dateInMonth.getDay() === 0 || dateInMonth.getDay() === 6;
             const isToday = day === todayObj.getDate() && currentMonth === todayObj.getMonth() && currentYear === todayObj.getFullYear();
             return (
-              <div key={`header-${day}`} className={`${styles.dayCell} ${styles.headerCell} ${isWeekEnd ? styles.weekEnd : ''} ${isToday ? styles.today : ''}`}>
+              <div key={`header-${day}`} id={isToday ? 'today-cell' : undefined} className={`${styles.dayCell} ${styles.headerCell} ${isWeekEnd ? styles.weekEnd : ''} ${isToday ? styles.today : ''}`}>
                 {day}
               </div>
             );
@@ -309,8 +328,10 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
         ).map(([categoryName, { goals: categoryGoals, color }]) => (
           <React.Fragment key={categoryName}>
             <div className={styles.categoryRow}>
-              <div className={styles.categoryColor} style={{ backgroundColor: color }} />
-              {categoryName}
+              <div className={styles.categoryContent}>
+                <div className={styles.categoryColor} style={{ backgroundColor: color }} />
+                {categoryName}
+              </div>
             </div>
             
             {categoryGoals.map((goal) => {
@@ -346,6 +367,7 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
             })}
           </React.Fragment>
         ))}
+        </div>
       </div>
 
       {popover && (
