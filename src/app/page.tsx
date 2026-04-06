@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { db } from '@/db';
 import { goals, logs } from '@/db/schema';
 import ClientTracker from './ClientTracker';
