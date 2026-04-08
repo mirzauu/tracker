@@ -1,7 +1,5 @@
-import { oauth2Client } from '@/utils/googleAuth';
+import { oauth2Client, saveTokens } from '@/utils/googleAuth';
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -14,9 +12,8 @@ export async function GET(request: NextRequest) {
   try {
     const { tokens } = await oauth2Client.getToken(code);
     
-    // Save tokens to a file for persistence (local dev)
-    const tokenPath = path.join(process.cwd(), 'token.json');
-    fs.writeFileSync(tokenPath, JSON.stringify(tokens));
+    // Save tokens to the database instead of a file
+    await saveTokens(tokens);
 
     // Redirect back to the home page
     return NextResponse.redirect(new URL('/', request.url));
@@ -25,3 +22,4 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to exchange code for tokens' }, { status: 500 });
   }
 }
+

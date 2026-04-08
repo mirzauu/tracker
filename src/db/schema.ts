@@ -47,3 +47,10 @@ export const logs = pgTable('logs', {
   value: integer('value').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+export const oauth_tokens = pgTable('oauth_tokens', {
+  provider: text('provider').primaryKey(), // e.g., 'google_calendar'
+  tokens: text('tokens').notNull(), // JSON string of tokens
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
+

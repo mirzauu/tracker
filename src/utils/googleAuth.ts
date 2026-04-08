@@ -1,4 +1,7 @@
 import { google } from 'googleapis';
+import { db } from '@/db';
+import { oauth_tokens } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -22,3 +25,37 @@ export function getAuthUrl() {
     prompt: 'consent',
   });
 }
+
+export async function getStoredTokens() {
+  try {
+    const result = await db.select().from(oauth_tokens).where(eq(oauth_tokens.provider, 'google_calendar')).limit(1);
+    if (result.length > 0) {
+      return JSON.parse(result[0].tokens);
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching tokens from DB:', error);
+    return null;
+  }
+}
+
+export async function saveTokens(tokens: any) {
+  try {
+    await db.insert(oauth_tokens)
+      .values({
+        provider: 'google_calendar',
+        tokens: JSON.stringify(tokens),
+        updatedAt: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: oauth_tokens.provider,
+        set: {
+          tokens: JSON.stringify(tokens),
+          updatedAt: new Date(),
+        },
+      });
+  } catch (error) {
+    console.error('Error saving tokens to DB:', error);
+  }
+}
+

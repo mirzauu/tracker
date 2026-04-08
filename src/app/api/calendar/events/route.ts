@@ -1,25 +1,21 @@
 import { google } from 'googleapis';
-import { oauth2Client } from '@/utils/googleAuth';
+import { oauth2Client, getStoredTokens, saveTokens } from '@/utils/googleAuth';
 import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
 
 export async function GET() {
-  const tokenPath = path.join(process.cwd(), 'token.json');
-  
-  if (!fs.existsSync(tokenPath)) {
-    return NextResponse.json({ authenticated: false, events: [] });
-  }
-
   try {
-    const tokens = JSON.parse(fs.readFileSync(tokenPath, 'utf8'));
+    const tokens = await getStoredTokens();
+    if (!tokens) {
+      return NextResponse.json({ authenticated: false, events: [] });
+    }
+
     oauth2Client.setCredentials(tokens);
 
     // Refresh token if expired
     if (tokens.expiry_date && tokens.expiry_date <= Date.now()) {
       const refreshed = await oauth2Client.refreshAccessToken();
       const updatedTokens = { ...tokens, ...refreshed.credentials };
-      fs.writeFileSync(tokenPath, JSON.stringify(updatedTokens));
+      await saveTokens(updatedTokens);
       oauth2Client.setCredentials(updatedTokens);
     }
 
@@ -67,13 +63,11 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: 'Missing eventId' }, { status: 400 });
   }
 
-  const tokenPath = path.join(process.cwd(), 'token.json');
-  if (!fs.existsSync(tokenPath)) {
-    return NextResponse.json({ authenticated: false, error: 'Not authenticated' }, { status: 401 });
-  }
-
   try {
-    const tokens = JSON.parse(fs.readFileSync(tokenPath, 'utf8'));
+    const tokens = await getStoredTokens();
+    if (!tokens) {
+      return NextResponse.json({ authenticated: false, error: 'Not authenticated' }, { status: 401 });
+    }
     oauth2Client.setCredentials(tokens);
 
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
@@ -114,12 +108,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing summary' }, { status: 400 });
     }
 
-    const tokenPath = path.join(process.cwd(), 'token.json');
-    if (!fs.existsSync(tokenPath)) {
+    const tokens = await getStoredTokens();
+    if (!tokens) {
       return NextResponse.json({ authenticated: false, error: 'Not authenticated' }, { status: 401 });
     }
 
-    const tokens = JSON.parse(fs.readFileSync(tokenPath, 'utf8'));
     oauth2Client.setCredentials(tokens);
 
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
