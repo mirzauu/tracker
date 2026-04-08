@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
+import CalendarTasks from '@/components/CalendarTasks';
 
 type GoalType = 'daily' | 'weekly' | 'monthly';
 
@@ -289,6 +290,8 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
 
   return (
     <div className={styles.container}>
+      <div className={styles.mainLayout}>
+        <div className={styles.trackerContent}>
       <header className={styles.header}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div className={styles.monthNav}>
@@ -414,6 +417,12 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
       )}
       
       {activeAlarm && <div onClick={() => setActiveAlarm(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', zIndex: 999 }} />}
+
+        </div>
+        <div className={styles.tasksSidebar}>
+          <CalendarTasks />
+        </div>
+      </div>
 
       <style jsx>{`
         @keyframes pop {

@@ -1,5 +1,5 @@
 .container {
-  max-width: 1400px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 40px 20px;
 }
@@ -278,3 +278,47 @@
   background: #fef2f2;
   border-color: var(--color-red);
 }
+
+.mainLayout {
+  display: flex;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  min-height: calc(100vh - 80px); /* Account for padding */
+}
+
+.trackerContent {
+  max-width: 100%;
+  /* remove flex: 1 so it centers inside the flex container */
+}
+
+.tasksSidebar {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  pointer-events: none; /* Let clicks pass through empty space */
+}
+
+.tasksSidebar > * {
+  pointer-events: auto; /* Re-enable for the actual panel */
+}
+
+@media (max-width: 1300px) {
+  .mainLayout {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 32px;
+  }
+  
+  .tasksSidebar {
+    position: static;
+    height: auto;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    justify-content: center;
+  }
+}
+
