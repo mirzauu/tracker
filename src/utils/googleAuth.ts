@@ -1,7 +1,7 @@
 import { google } from 'googleapis';
 import { db } from '@/db';
 import { oauth_tokens } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -26,9 +26,18 @@ export function getAuthUrl() {
   });
 }
 
-export async function getStoredTokens() {
+export async function getStoredTokens(userId: string) {
   try {
-    const result = await db.select().from(oauth_tokens).where(eq(oauth_tokens.provider, 'google_calendar')).limit(1);
+    const result = await db.select()
+      .from(oauth_tokens)
+      .where(
+        and(
+          eq(oauth_tokens.provider, 'google_calendar'),
+          eq(oauth_tokens.userId, userId)
+        )
+      )
+      .limit(1);
+      
     if (result.length > 0) {
       return JSON.parse(result[0].tokens);
     }
@@ -39,16 +48,17 @@ export async function getStoredTokens() {
   }
 }
 
-export async function saveTokens(tokens: any) {
+export async function saveTokens(userId: string, tokens: any) {
   try {
     await db.insert(oauth_tokens)
       .values({
+        userId: userId,
         provider: 'google_calendar',
         tokens: JSON.stringify(tokens),
         updatedAt: new Date(),
       })
       .onConflictDoUpdate({
-        target: oauth_tokens.provider,
+        target: [oauth_tokens.userId, oauth_tokens.provider],
         set: {
           tokens: JSON.stringify(tokens),
           updatedAt: new Date(),

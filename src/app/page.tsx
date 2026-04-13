@@ -1,16 +1,30 @@
 export const dynamic = 'force-dynamic';
 import { db } from '@/db';
-import { logs } from '@/db/schema';
+import { logs, goals } from '@/db/schema';
 import ClientTracker from './ClientTracker';
+import { getSession } from '@/utils/auth';
+import { eq } from 'drizzle-orm';
+import { redirect } from 'next/navigation';
 
 export default async function Page() {
-  // Fetch goals with categories and logs from the database
+  const session = await getSession();
+  
+  if (!session) {
+    redirect('/login');
+  }
+
+  const userId = session.userId;
+
+  // Fetch goals with categories belonging to the user
   const allGoalsWithCategory = await db.query.goals.findMany({
+    where: eq(goals.userId, userId),
     with: {
       category: true,
     },
   });
-  const allLogs = await db.select().from(logs);
+
+  // Fetch logs belonging to the user
+  const allLogs = await db.select().from(logs).where(eq(logs.userId, userId));
 
   // Map database goals to the format Expected by Tracker
   const initialGoals = allGoalsWithCategory.map(g => ({

@@ -51,7 +51,13 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
   const [data, setData] = useState<Record<string, Record<string | number, number>>>(initialData);
   const [popover, setPopover] = useState<{ goalId: string; day: string | number; val: number } | null>(null);
   const [activeAlarm, setActiveAlarm] = useState<Goal | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
   const handledReminders = React.useRef<Record<string, boolean>>({});
+
+  const handleLogout = async () => {
+    const { logout } = await import('./login/actions');
+    await logout();
+  };
 
   const [viewDate, setViewDate] = useState(new Date());
 
@@ -299,17 +305,42 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
             <span>{currentMonthName} {currentYear}</span>
             <button onClick={handleNextMonth}>{'>'}</button>
           </div>
-          <Link href="/goals" style={{ 
-            fontSize: '14px', 
-            padding: '8px 16px', 
-            borderRadius: '6px', 
-            background: 'var(--color-green)',
-            color: 'white',
-            fontWeight: 500,
-            textDecoration: 'none'
-          }}>
-            Manage Goals
-          </Link>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <Link href="/goals" style={{ 
+              fontSize: '14px', 
+              padding: '8px 16px', 
+              borderRadius: '6px', 
+              background: 'var(--color-green)',
+              color: 'white',
+              fontWeight: 500,
+              textDecoration: 'none'
+            }}>
+              Manage Goals
+            </Link>
+
+            <div className={styles.userMenu}>
+              <button 
+                onClick={() => setMenuOpen(!menuOpen)}
+                className={styles.userAvatar}
+              >
+                👤
+              </button>
+              
+              {menuOpen && (
+                <div className={styles.dropdown}>
+                  <button onClick={handleLogout} className={styles.logoutBtn}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                      <polyline points="16 17 21 12 16 7"></polyline>
+                      <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </header>
 

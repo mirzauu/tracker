@@ -1,10 +1,20 @@
 import { google } from 'googleapis';
 import { oauth2Client, getStoredTokens, saveTokens } from '@/utils/googleAuth';
 import { NextResponse } from 'next/server';
+import { getSession } from '@/utils/auth';
+
+async function getUser() {
+  const session = await getSession();
+  if (!session) return null;
+  return { id: session.userId };
+}
 
 export async function GET() {
   try {
-    const tokens = await getStoredTokens();
+    const user = await getUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const tokens = await getStoredTokens(user.id);
     if (!tokens) {
       return NextResponse.json({ authenticated: false, events: [] });
     }
@@ -15,7 +25,7 @@ export async function GET() {
     if (tokens.expiry_date && tokens.expiry_date <= Date.now()) {
       const refreshed = await oauth2Client.refreshAccessToken();
       const updatedTokens = { ...tokens, ...refreshed.credentials };
-      await saveTokens(updatedTokens);
+      await saveTokens(user.id, updatedTokens);
       oauth2Client.setCredentials(updatedTokens);
     }
 
@@ -43,7 +53,7 @@ export async function GET() {
         summary: event.summary,
         start: event.start?.dateTime || event.start?.date,
         end: event.end?.dateTime || event.end?.date,
-        color: event.colorId, // Optional: handle colors if needed
+        color: event.colorId,
       }))
     });
   } catch (error: any) {
@@ -64,7 +74,10 @@ export async function PATCH(request: Request) {
   }
 
   try {
-    const tokens = await getStoredTokens();
+    const user = await getUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const tokens = await getStoredTokens(user.id);
     if (!tokens) {
       return NextResponse.json({ authenticated: false, error: 'Not authenticated' }, { status: 401 });
     }
@@ -72,7 +85,6 @@ export async function PATCH(request: Request) {
 
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     
-    // First get the current event to preserve its summary
     const event = await calendar.events.get({
       calendarId: 'primary',
       eventId: eventId,
@@ -102,13 +114,16 @@ export async function PATCH(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const user = await getUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     const { summary } = await request.json();
 
     if (!summary) {
       return NextResponse.json({ error: 'Missing summary' }, { status: 400 });
     }
 
-    const tokens = await getStoredTokens();
+    const tokens = await getStoredTokens(user.id);
     if (!tokens) {
       return NextResponse.json({ authenticated: false, error: 'Not authenticated' }, { status: 401 });
     }

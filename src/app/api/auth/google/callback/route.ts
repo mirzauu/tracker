@@ -1,5 +1,6 @@
 import { oauth2Client, saveTokens } from '@/utils/googleAuth';
 import { NextRequest, NextResponse } from 'next/server';
+import { getSession } from '@/utils/auth';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -10,10 +11,17 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const session = await getSession();
+    const userId = session?.userId;
+    
+    if (!userId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { tokens } = await oauth2Client.getToken(code);
     
-    // Save tokens to the database instead of a file
-    await saveTokens(tokens);
+    // Save tokens to the database per user
+    await saveTokens(userId, tokens);
 
     // Redirect back to the home page
     return NextResponse.redirect(new URL('/', request.url));
