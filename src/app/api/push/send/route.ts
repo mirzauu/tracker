@@ -1,5 +1,6 @@
 import { db } from '@/db';
 import { goals, pushSubscriptions, profiles } from '@/db/schema';
+import { getSession } from '@/utils/auth';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import webpush from 'web-push';
@@ -16,6 +17,7 @@ webpush.setVapidDetails(
 // This endpoint is called periodically (e.g., via cron) to check reminders and send push notifications
 // Call it with a secret key to prevent unauthorized access
 export async function GET(request: NextRequest) {
+  console.log('--- PUSH REMINDER CHECK TRIGGERED ---');
   const authHeader = request.headers.get('authorization');
   const vercelCron = request.headers.get('x-vercel-cron');
   const cronSecret = process.env.CRON_SECRET || process.env.JWT_SECRET;
@@ -51,7 +53,11 @@ export async function GET(request: NextRequest) {
           hour12: false
         }).format(now);
         
-        return userTime === g.reminderTime;
+        const matches = userTime === g.reminderTime;
+        
+        console.log(`[PushCheck] Goal: "${g.name}", UserTZ: ${g.timezone}, LocalTime: ${userTime}, TargetTime: ${g.reminderTime}, Match: ${matches}`);
+        
+        return matches;
       } catch (e) {
         console.error(`Invalid timezone for user ${g.userId}: ${g.timezone}`);
         // Fallback to UTC if timezone is invalid
@@ -61,7 +67,10 @@ export async function GET(request: NextRequest) {
           minute: '2-digit',
           hour12: false
         }).format(now);
-        return utcTime === g.reminderTime;
+        
+        const matches = utcTime === g.reminderTime;
+        console.log(`[PushCheck] FALLBACK UTC - Goal: "${g.name}", TargetTime: ${g.reminderTime}, Match: ${matches}`);
+        return matches;
       }
     });
 
@@ -110,6 +119,7 @@ export async function GET(request: NextRequest) {
               },
               payload
             );
+            console.log(`[PushSent] Successfully sent notification to user ${userId} for goal "${goal.name}"`);
             sent++;
           } catch (error: any) {
             console.error(`Push failed for sub ${sub.id}:`, error.statusCode);
@@ -136,7 +146,14 @@ export async function GET(request: NextRequest) {
 // Manual trigger: send a push notification for a specific goal (for testing)
 export async function POST(request: Request) {
   try {
-    const { userId, title, body } = await request.json();
+    const body = await request.json();
+    let userId = body.userId;
+    const { title, body: msgBody } = body;
+
+    if (!userId) {
+      const session = await getSession();
+      userId = session?.userId;
+    }
 
     if (!userId) {
       return NextResponse.json({ error: 'userId required' }, { status: 400 });
@@ -153,7 +170,7 @@ export async function POST(request: Request) {
 
     const payload = JSON.stringify({
       title: title || '🔔 Habit Reminder',
-      body: body || 'Time to work on your habit!',
+      body: msgBody || 'Time to work on your habit!',
       url: '/',
     });
 

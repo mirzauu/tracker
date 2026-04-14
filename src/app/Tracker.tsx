@@ -444,6 +444,36 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
                     </button>
                   </div>
 
+                  <div style={{ padding: '8px', borderBottom: '1px solid var(--border-medium)', marginBottom: '8px' }}>
+                    <button 
+                      onClick={async () => {
+                        const res = await fetch('/api/push/send', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ 
+                            title: '🧪 Test Notification',
+                            body: 'If you see this, push notifications are working!' 
+                          }),
+                        });
+                        
+                        if (res.ok) alert('Test notification sent!');
+                        else alert('Failed to send test notification.');
+                      }}
+                      style={{ 
+                        display: 'flex', alignItems: 'center', gap: '10px',
+                        padding: '8px 10px', borderRadius: '8px', width: '100%',
+                        background: 'transparent',
+                        color: 'var(--text-secondary)',
+                        fontSize: '13px', fontWeight: 500,
+                        cursor: 'pointer',
+                        border: '1px dashed var(--border-medium)'
+                      }}
+                    >
+                      <span style={{ fontSize: '16px' }}>🧪</span>
+                      Send Test Push
+                    </button>
+                  </div>
+
                   <button onClick={handleLogout} className={styles.logoutBtn}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>

@@ -15,6 +15,11 @@ export async function middleware(request: NextRequest) {
 
   if (!token) {
     if (!isAuthPage && !isCronEndpoint) {
+      // If it's an API request, return 401 instead of redirecting
+      if (request.nextUrl.pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+      }
+      
       const url = request.nextUrl.clone();
       url.pathname = '/login';
       return NextResponse.redirect(url);
