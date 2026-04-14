@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
-import CalendarTasks from '@/components/CalendarTasks';
+// import CalendarTasks from '@/components/CalendarTasks';
 
 type GoalType = 'daily' | 'weekly' | 'monthly';
 
@@ -52,12 +52,67 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
   const [popover, setPopover] = useState<{ goalId: string; day: string | number; val: number } | null>(null);
   const [activeAlarm, setActiveAlarm] = useState<Goal | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [theme, setTheme] = useState('default');
+  const [pushEnabled, setPushEnabled] = useState(false);
   const handledReminders = React.useRef<Record<string, boolean>>({});
+  const menuRef = React.useRef<HTMLDivElement>(null);
 
   const handleLogout = async () => {
     const { logout } = await import('./login/actions');
     await logout();
   };
+
+  React.useEffect(() => {
+    const savedTheme = localStorage.getItem('app_theme');
+    if (savedTheme) {
+      setTheme(savedTheme);
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
+
+    // Register service worker and subscribe to push
+    const initPush = async () => {
+      const { registerServiceWorker, subscribeToPush, isPushSupported, getPushPermissionState } = await import('@/utils/pushNotifications');
+      if (!isPushSupported()) return;
+      
+      await registerServiceWorker();
+      
+      const permission = await getPushPermissionState();
+      if (permission === 'granted') {
+        const success = await subscribeToPush();
+        setPushEnabled(success);
+      } else if (permission === 'default') {
+        // We'll let the user enable it from the menu
+        setPushEnabled(false);
+      }
+    };
+    initPush();
+  }, []);
+
+  const changeTheme = (newTheme: string) => {
+    setTheme(newTheme);
+    localStorage.setItem('app_theme', newTheme);
+    if (newTheme === 'default') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', newTheme);
+    }
+  };
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]);
 
   const [viewDate, setViewDate] = useState(new Date());
 
@@ -319,7 +374,7 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
               Manage Goals
             </Link>
 
-            <div className={styles.userMenu}>
+            <div className={styles.userMenu} ref={menuRef}>
               <button 
                 onClick={() => setMenuOpen(!menuOpen)}
                 className={styles.userAvatar}
@@ -329,6 +384,49 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
               
               {menuOpen && (
                 <div className={styles.dropdown}>
+                  <div style={{ padding: '8px', borderBottom: '1px solid var(--border-medium)', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 600 }}>THEME</div>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                      <button onClick={() => changeTheme('default')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#10b981', border: theme === 'default' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Default" />
+                      <button onClick={() => changeTheme('dark')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#1f2937', border: theme === 'dark' ? '2px solid var(--text-primary)' : '2px solid var(--border-light)' }} title="Dark" />
+                      <button onClick={() => changeTheme('midnight')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#0f172a', border: theme === 'midnight' ? '2px solid var(--text-primary)' : '2px solid var(--border-light)' }} title="Midnight" />
+                      <button onClick={() => changeTheme('blue')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#3b82f6', border: theme === 'blue' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Blue" />
+                      <button onClick={() => changeTheme('purple')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#a855f7', border: theme === 'purple' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Purple" />
+                    </div>
+                  </div>
+
+                  <div style={{ padding: '8px', borderBottom: '1px solid var(--border-medium)', marginBottom: '8px' }}>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: 600 }}>NOTIFICATIONS</div>
+                    <button 
+                      onClick={async () => {
+                        if (pushEnabled) {
+                          const { unsubscribeFromPush } = await import('@/utils/pushNotifications');
+                          await unsubscribeFromPush();
+                          setPushEnabled(false);
+                        } else {
+                          const { subscribeToPush, registerServiceWorker } = await import('@/utils/pushNotifications');
+                          await registerServiceWorker();
+                          const success = await subscribeToPush();
+                          setPushEnabled(success);
+                          if (!success) {
+                            alert('Please allow notifications in your browser settings.');
+                          }
+                        }
+                      }}
+                      style={{ 
+                        display: 'flex', alignItems: 'center', gap: '10px',
+                        padding: '8px 10px', borderRadius: '8px', width: '100%',
+                        background: pushEnabled ? 'var(--color-green-light)' : 'transparent',
+                        color: pushEnabled ? 'var(--color-green)' : 'var(--text-secondary)',
+                        fontSize: '13px', fontWeight: 500,
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      <span style={{ fontSize: '16px' }}>{pushEnabled ? '🔔' : '🔕'}</span>
+                      {pushEnabled ? 'Push Enabled' : 'Enable Push'}
+                    </button>
+                  </div>
+
                   <button onClick={handleLogout} className={styles.logoutBtn}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
@@ -450,9 +548,11 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
       {activeAlarm && <div onClick={() => setActiveAlarm(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)', zIndex: 999 }} />}
 
         </div>
+{/* 
         <div className={styles.tasksSidebar}>
           <CalendarTasks />
         </div>
+        */}
       </div>
 
       <style jsx>{`

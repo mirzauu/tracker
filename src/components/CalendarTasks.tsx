@@ -281,7 +281,7 @@ export default function CalendarTasks() {
 
       <style jsx>{`
         .calendar-panel {
-          background: white;
+          background: var(--bg-color);
           border-radius: 12px;
           border: 1px solid var(--border-medium);
           padding: 20px;
@@ -333,26 +333,26 @@ export default function CalendarTasks() {
           gap: 12px;
           padding: 10px;
           border-radius: 8px;
-          background: #f8fafc;
+          background: var(--category-bg);
           transition: background 0.2s;
         }
 
         .event-item:hover {
-          background: #f1f5f9;
+          background: var(--cell-bg);
         }
 
         .event-item.completed {
-          background: #fdfdfd;
+          background: var(--bg-color);
           opacity: 0.7;
         }
 
         .event-item.completed .event-summary {
           text-decoration: line-through;
-          color: #94a3b8;
+          color: var(--text-secondary);
         }
 
         .event-item.completed .event-time {
-          color: #94a3b8;
+          color: var(--text-secondary);
         }
 
 
@@ -370,7 +370,7 @@ export default function CalendarTasks() {
         .check-circle {
           width: 18px;
           height: 18px;
-          border: 2px solid #cbd5e1;
+          border: 2px solid var(--border-dark);
           border-radius: 50%;
           transition: all 0.2s;
           position: relative;
@@ -390,7 +390,7 @@ export default function CalendarTasks() {
 
         .complete-trigger:hover .check-circle {
           border-color: var(--color-green);
-          background: #f0fdf4;
+          background: var(--color-green-light);
         }
 
         .complete-trigger:hover .check-circle::after {
@@ -458,7 +458,7 @@ export default function CalendarTasks() {
         .spinner {
           width: 30px;
           height: 30px;
-          border: 3px solid #f3f3f3;
+          border: 3px solid var(--border-light);
           border-top: 3px solid var(--color-green);
           border-radius: 50%;
           animation: spin 1s linear infinite;

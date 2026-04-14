@@ -56,7 +56,7 @@
 }
 
 .headerRow {
-  background: #fafafa;
+  background: var(--header-bg);
   font-weight: 500;
   color: var(--text-secondary);
   font-size: 13px;
@@ -97,7 +97,7 @@
   align-items: center;
   justify-content: center;
   border-right: 1px solid var(--border-light);
-  background: #f1f5f9; /* New default background for all day columns */
+  background: var(--cell-bg);
   position: relative;
   transition: background 0.1s;
 }
@@ -111,7 +111,7 @@
 }
 
 .headerRow .goalName {
-  background: #fafafa;
+  background: var(--header-bg);
   z-index: 11;
 }
 
@@ -122,12 +122,12 @@
 
 /* Today highlight */
 .today {
-  background: #ffffff !important; /* Stand out with white background */
+  background: var(--today-bg) !important;
 }
 
 /* Specific styling for the today date in header */
 .headerCell.today {
-  color: #000000 !important;
+  color: var(--today-text) !important;
   font-weight: 800 !important;
 }
 
@@ -138,7 +138,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  border: 2px solid #000000;
+  border: 2px solid var(--today-border);
   z-index: 3;
   pointer-events: none;
 }
@@ -249,7 +249,7 @@
   align-items: center;
 }
 .categoryRow {
-  background: #f8fafc;
+  background: var(--category-bg);
   border-bottom: 2px solid var(--border-medium);
   font-weight: 600;
   font-size: 14px;
@@ -275,7 +275,7 @@
 }
 
 .checkbox.missed {
-  background: #fef2f2;
+  background: var(--checkbox-missed-bg);
   border-color: var(--color-red);
 }
 
@@ -342,8 +342,8 @@
 }
 
 .userAvatar:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
+  background: var(--hover-bg);
+  border-color: var(--border-dark);
   transform: translateY(-1px);
 }
 
@@ -351,7 +351,7 @@
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background: white;
+  background: var(--dropdown-bg);
   border: 1px solid var(--border-medium);
   border-radius: 12px;
   padding: 8px;
@@ -383,6 +383,6 @@
 }
 
 .logoutBtn:hover {
-  background: #fef2f2;
+  background: var(--checkbox-missed-bg);
 }
 

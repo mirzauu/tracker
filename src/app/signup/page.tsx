@@ -2,17 +2,18 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { requestOtp, verifyOtp } from './actions';
-import s from './login.module.css';
+import s from './signup.module.css';
 import Link from 'next/link';
 
-export default function LoginPage() {
-  const [stage, setStage] = useState<'login' | 'verify'>('login');
+export default function SignupPage() {
+  const [stage, setStage] = useState<'signup' | 'verify'>('signup');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
-  // Login State
+  // Signup State
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   // OTP State
   const [otp, setOtp] = useState(['', '', '', '']);
@@ -24,7 +25,7 @@ export default function LoginPage() {
 
   const isEmailValid = email.includes('@') && email.length > 3;
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
 
@@ -35,7 +36,6 @@ export default function LoginPage() {
     const formData = new FormData();
     formData.append('email', email);
 
-    // Using the same requestOtp for both login and signup as it just sends the code
     const result = await requestOtp(formData);
 
     if (result?.error) {
@@ -96,10 +96,10 @@ export default function LoginPage() {
   return (
     <div className={s.layoutWrapper}>
       <div className={s.authCard}>
-        {stage === 'login' ? (
+        {stage === 'signup' ? (
           <>
             <div className={s.illustrationPanel}>
-              <img src="/signup_img.png" alt="Login Illustration" className={s.illustration} />
+              <img src="/signup_img.png" alt="Signup Illustration" className={s.illustration} />
             </div>
 
             <div className={s.formPanel}>
@@ -110,10 +110,10 @@ export default function LoginPage() {
                     <polyline points="12 19 5 12 12 5"></polyline>
                   </svg>
                 </button>
-                <h1 className={s.title}>Sign in</h1>
+                <h1 className={s.title}>Sign up</h1>
               </div>
 
-              <form onSubmit={handleLogin} className={s.formContainer}>
+              <form onSubmit={handleSignup} className={s.formContainer}>
                 <div className={s.inputGroup}>
                   <label>Email</label>
                   <div className={`${s.inputWrapper} ${email.length > 0 ? s.inputWrapperActive : ''}`}>
@@ -134,16 +134,32 @@ export default function LoginPage() {
                   </div>
                 </div>
 
+                <div className={s.inputGroup}>
+                  <label>Password</label>
+                  <div className={s.inputWrapper}>
+                    <input
+                      type="password"
+                      placeholder="8+ characters"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                </div>
+
                 <div className={s.formSpacer}></div>
+
+                <p className={s.disclaimer}>
+                  Creating an account means you agree to all terms and conditions of our services
+                </p>
 
                 {error && <div className={s.errorText}>{error}</div>}
 
                 <button type="submit" disabled={loading} className={s.primaryBtn}>
-                  {loading ? <span className={s.spinner}></span> : 'Sign in'}
+                  {loading ? <span className={s.spinner}></span> : 'Create account'}
                 </button>
 
                 <div className={s.bottomLink}>
-                  New here? <Link href="/signup">Create account</Link>
+                  Already a member? <Link href="/login">login</Link>
                 </div>
               </form>
             </div>
@@ -156,7 +172,7 @@ export default function LoginPage() {
 
             <div className={s.formPanel}>
               <div className={s.headerRow}>
-                <button className={s.iconBtn} onClick={() => setStage('login')}>
+                <button className={s.iconBtn} onClick={() => setStage('signup')}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
@@ -187,7 +203,7 @@ export default function LoginPage() {
                 </div>
 
                 <div className={s.resendLinks}>
-                  <p>Didn't receive a code? <button type="button" onClick={handleLogin} className={s.linkBtn}>Request again</button></p>
+                  <p>Didn't receive a code? <button type="button" onClick={handleSignup} className={s.linkBtn}>Request again</button></p>
                   <button type="button" className={`${s.linkBtn} ${s.linkBtnMt}`}>Get via call</button>
                 </div>
 
@@ -202,7 +218,7 @@ export default function LoginPage() {
                 </button>
 
                 <div className={s.bottomLink}>
-                  New here? <Link href="/signup">Create account instead</Link>
+                  Already a member? <Link href="/login">Sign in instead</Link>
                 </div>
               </div>
             </div>

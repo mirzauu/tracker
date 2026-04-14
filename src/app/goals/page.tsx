@@ -53,6 +53,10 @@ export default function GoalsPage() {
 
   useEffect(() => {
     refreshData();
+    const savedTheme = localStorage.getItem('app_theme');
+    if (savedTheme) {
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    }
   }, []);
 
   const handleCreate = async () => {
