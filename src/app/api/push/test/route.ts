@@ -4,6 +4,10 @@ import { getSession } from '@/utils/auth';
 import { eq, and } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 
+export async function GET() {
+  return NextResponse.json({ message: 'Push test endpoint works' });
+}
+
 // Save a push subscription for the current user
 export async function POST(request: Request) {
   console.log('--- SUBSCRIBE POST CALLED ---');

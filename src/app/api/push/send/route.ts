@@ -1,5 +1,5 @@
 import { db } from '@/db';
-import { goals, pushSubscriptions } from '@/db/schema';
+import { goals, pushSubscriptions, profiles } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { NextRequest, NextResponse } from 'next/server';
 import webpush from 'web-push';
@@ -17,26 +17,56 @@ webpush.setVapidDetails(
 // Call it with a secret key to prevent unauthorized access
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
+  const vercelCron = request.headers.get('x-vercel-cron');
   const cronSecret = process.env.CRON_SECRET || process.env.JWT_SECRET;
   
-  if (authHeader !== `Bearer ${cronSecret}`) {
+  // Allow if Bearer token matches OR if it's a verified Vercel cron request
+  if (authHeader !== `Bearer ${cronSecret}` && vercelCron !== '1') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const now = new Date();
-    const currentHHmm = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-
-    // Find all goals with reminders at the current time
+    // Find all goals with reminders
+    // Join with profiles to get the user's timezone
     const goalsWithReminders = await db
-      .select()
+      .select({
+        id: goals.id,
+        name: goals.name,
+        userId: goals.userId,
+        reminderTime: goals.reminderTime,
+        timezone: profiles.timezone,
+      })
       .from(goals)
+      .innerJoin(profiles, eq(goals.userId, profiles.id))
       .where(eq(goals.reminderOn, true));
 
-    const matchingGoals = goalsWithReminders.filter(g => g.reminderTime === currentHHmm);
+    const matchingGoals = goalsWithReminders.filter(g => {
+      // Calculate current time in user's timezone
+      try {
+        const userTime = new Intl.DateTimeFormat('en-US', {
+          timeZone: g.timezone || 'UTC',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }).format(now);
+        
+        return userTime === g.reminderTime;
+      } catch (e) {
+        console.error(`Invalid timezone for user ${g.userId}: ${g.timezone}`);
+        // Fallback to UTC if timezone is invalid
+        const utcTime = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'UTC',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }).format(now);
+        return utcTime === g.reminderTime;
+      }
+    });
 
     if (matchingGoals.length === 0) {
-      return NextResponse.json({ message: 'No reminders to send', time: currentHHmm });
+      return NextResponse.json({ message: 'No reminders to send at this time' });
     }
 
     // Group goals by user
@@ -95,7 +125,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ 
       message: `Sent ${sent} notifications, ${failed} failed`,
-      time: currentHHmm,
       goalsMatched: matchingGoals.length,
     });
   } catch (error) {

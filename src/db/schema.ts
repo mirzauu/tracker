@@ -16,6 +16,7 @@ export const profiles = pgTable('profiles', {
   fullName: text('full_name'),
   avatarUrl: text('avatar_url'),
   planId: uuid('plan_id').references(() => plans.id).notNull(),
+  timezone: text('timezone').default('UTC').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
 

@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import styles from './page.module.css';
+import { updateUserTimezone } from './actions';
 // import CalendarTasks from '@/components/CalendarTasks';
 
 type GoalType = 'daily' | 'weekly' | 'monthly';
@@ -86,6 +87,10 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
       }
     };
     initPush();
+
+    // Set user timezone
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    updateUserTimezone(tz);
   }, []);
 
   const changeTheme = (newTheme: string) => {
@@ -159,6 +164,18 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
           if (!handledReminders.current[alarmKey]) {
             handledReminders.current[alarmKey] = true;
             setActiveAlarm(goal);
+            
+            // Show browser notification if possible
+            if (Notification.permission === 'granted') {
+              navigator.serviceWorker.ready.then(registration => {
+                registration.showNotification('🔔 Habit Reminder', {
+                  body: `Time for "${goal.name}"!`,
+                  icon: '/favicon.ico',
+                  tag: `reminder-${goal.id}`,
+                });
+              });
+            }
+
             // Play a ding sound
             try {
               const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');

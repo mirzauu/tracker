@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/db';
-import { goals, categories } from '@/db/schema';
+import { goals, categories, profiles } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { getSession } from '@/utils/auth';
@@ -90,5 +90,16 @@ export async function deleteGoal(id: string) {
     revalidatePath('/goals');
   } catch (error) {
     console.error('Failed to delete goal:', error);
+  }
+}
+
+export async function updateUserTimezone(timezone: string) {
+  const userId = await getUserId();
+  if (!userId) return;
+
+  try {
+    await db.update(profiles).set({ timezone }).where(eq(profiles.id, userId));
+  } catch (error) {
+    console.error('Failed to update timezone:', error);
   }
 }
