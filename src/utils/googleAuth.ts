@@ -28,6 +28,7 @@ export function getAuthUrl() {
 
 export async function getStoredTokens(userId: string) {
   try {
+    console.log(`Fetching tokens for user: ${userId}`);
     const result = await db.select()
       .from(oauth_tokens)
       .where(
@@ -39,8 +40,10 @@ export async function getStoredTokens(userId: string) {
       .limit(1);
       
     if (result.length > 0) {
+      console.log(`Found tokens for user: ${userId}`);
       return JSON.parse(result[0].tokens);
     }
+    console.log(`No tokens found for user: ${userId}`);
     return null;
   } catch (error) {
     console.error('Error fetching tokens from DB:', error);
@@ -50,6 +53,11 @@ export async function getStoredTokens(userId: string) {
 
 export async function saveTokens(userId: string, tokens: any) {
   try {
+    console.log(`Saving tokens for user: ${userId}`);
+    if (!userId) {
+      console.error('Cannot save tokens: userId is missing');
+      return;
+    }
     await db.insert(oauth_tokens)
       .values({
         userId: userId,
@@ -64,6 +72,7 @@ export async function saveTokens(userId: string, tokens: any) {
           updatedAt: new Date(),
         },
       });
+    console.log(`Successfully saved tokens for user: ${userId}`);
   } catch (error) {
     console.error('Error saving tokens to DB:', error);
   }

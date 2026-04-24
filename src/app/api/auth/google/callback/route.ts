@@ -13,18 +13,23 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getSession();
     const userId = session?.userId;
+    console.log(`Auth Callback: userId from session is ${userId}`);
     
     if (!userId) {
+      console.error('Auth Callback Error: No userId in session');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    console.log('Auth Callback: Exchanging code for tokens...');
     const { tokens } = await oauth2Client.getToken(code);
+    console.log('Auth Callback: Tokens received successfully');
     
     // Save tokens to the database per user
     await saveTokens(userId, tokens);
 
     // Redirect back to the home page
     return NextResponse.redirect(new URL('/', request.url));
+
   } catch (error) {
     console.error('Error getting tokens:', error);
     return NextResponse.json({ error: 'Failed to exchange code for tokens' }, { status: 500 });

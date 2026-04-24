@@ -92,9 +92,13 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
     // Set user timezone
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     updateUserTimezone(tz);
+
+    // Record dashboard visit (page view ping)
+    fetch('/api/activity/ping', { method: 'POST' }).catch(() => {});
   }, []);
 
   const changeTheme = (newTheme: string) => {
+    const oldTheme = theme;
     setTheme(newTheme);
     localStorage.setItem('app_theme', newTheme);
     if (newTheme === 'default') {
@@ -102,6 +106,12 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
     } else {
       document.documentElement.setAttribute('data-theme', newTheme);
     }
+    // Track theme change
+    fetch('/api/activity/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ eventType: 'theme.changed', data: { from: oldTheme, to: newTheme } }),
+    }).catch(() => {});
   };
 
   React.useEffect(() => {
@@ -212,6 +222,10 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
       method: 'POST',
       body: JSON.stringify({ goalId, entryKey, value }),
     });
+    // Record goal interaction in daily activity
+    if (value > 0) {
+      fetch('/api/activity/goal-check', { method: 'POST' }).catch(() => {});
+    }
   };
 
   const handleDayClick = (goal: Goal, day: number) => {
@@ -410,6 +424,16 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
                       <button onClick={() => changeTheme('midnight')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#0f172a', border: theme === 'midnight' ? '2px solid var(--text-primary)' : '2px solid var(--border-light)' }} title="Midnight" />
                       <button onClick={() => changeTheme('blue')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#3b82f6', border: theme === 'blue' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Blue" />
                       <button onClick={() => changeTheme('purple')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#a855f7', border: theme === 'purple' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Purple" />
+                      <button onClick={() => changeTheme('sunset')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(135deg, #f6d365, #fda085)', border: theme === 'sunset' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Sunset" />
+                      <button onClick={() => changeTheme('ocean')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(to bottom, #090979, #00d4ff)', border: theme === 'ocean' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Ocean" />
+                      <button onClick={() => changeTheme('forest')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(135deg, #d4fc79, #96e6a1)', border: theme === 'forest' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Forest" />
+                      <button onClick={() => changeTheme('synthwave')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(to bottom, #240b36, #ff00ff)', border: theme === 'synthwave' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Synthwave" />
+                      <button onClick={() => changeTheme('sakura')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'linear-gradient(to bottom right, #fbc2eb, #a6c1ee)', border: theme === 'sakura' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Sakura" />
+                      <button onClick={() => changeTheme('galaxy')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#0f0c29', border: theme === 'galaxy' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Galaxy" />
+                      <button onClick={() => changeTheme('coffee')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#6d4c41', border: theme === 'coffee' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Coffee" />
+                      <button onClick={() => changeTheme('blueprint')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#1954a6', border: theme === 'blueprint' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Blueprint" />
+                      <button onClick={() => changeTheme('minimal-dots')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'radial-gradient(#d1d5db 2px, white 2px)', backgroundSize: '6px 6px', border: theme === 'minimal-dots' ? '2px solid var(--text-primary)' : '2px solid #e5e7eb' }} title="Minimal Dots" />
+                      <button onClick={() => changeTheme('holographic')} style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'conic-gradient(from 180deg at 50% 50%, #2a8af6 0deg, #a853ba 180deg, #e92a67 360deg)', border: theme === 'holographic' ? '2px solid var(--text-primary)' : '2px solid transparent' }} title="Holographic" />
                     </div>
                   </div>
 
@@ -473,6 +497,7 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
                           const { unsubscribeFromPush } = await import('@/utils/pushNotifications');
                           await unsubscribeFromPush();
                           setPushEnabled(false);
+                          fetch('/api/activity/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventType: 'notification.toggled', data: { enabled: false } }) }).catch(() => {});
                         } else {
                           const { subscribeToPush, registerServiceWorker } = await import('@/utils/pushNotifications');
                           await registerServiceWorker();
@@ -480,6 +505,8 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
                           setPushEnabled(success);
                           if (!success) {
                             alert('Please allow notifications in your browser settings.');
+                          } else {
+                            fetch('/api/activity/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ eventType: 'notification.toggled', data: { enabled: true } }) }).catch(() => {});
                           }
                         }
                       }}

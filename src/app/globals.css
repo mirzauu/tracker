@@ -125,6 +125,9 @@ body {
   padding: 0;
   font-family: var(--font-geist-sans), Arial, sans-serif;
   background-color: var(--bg-color);
+  background-image: var(--bg-image, none);
+  background-attachment: fixed;
+  background-size: cover;
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -140,5 +143,242 @@ button {
   cursor: pointer;
   font-family: inherit;
   color: inherit;
+}
+
+/* --- 10 NEW AMAZING THEMES --- */
+
+[data-theme="sunset"] {
+  --bg-color: rgba(255, 255, 255, 0.8);
+  --bg-image: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+  --text-primary: #5c2c16;
+  --text-secondary: #8c4a26;
+  --border-light: rgba(255, 255, 255, 0.5);
+  --border-medium: rgba(253, 160, 133, 0.3);
+  --border-dark: #fda085;
+  --current-day-bg: rgba(255, 255, 255, 0.9);
+  --hover-bg: rgba(255, 255, 255, 0.5);
+  --color-green: #e65100;
+  --color-green-light: rgba(253, 160, 133, 0.4);
+  --color-red: #d32f2f;
+  --color-gray: rgba(255, 255, 255, 0.6);
+  --header-bg: rgba(255, 255, 255, 0.85);
+  --cell-bg: rgba(255, 255, 255, 0.6);
+  --category-bg: rgba(255, 255, 255, 0.7);
+  --checkbox-missed-bg: rgba(255, 200, 200, 0.5);
+  --today-text: #e65100;
+  --today-border: #e65100;
+  --dropdown-bg: #fffaf0;
+}
+
+[data-theme="ocean"] {
+  --bg-color: rgba(10, 25, 47, 0.85);
+  --bg-image: linear-gradient(to bottom, #020024, #090979, #00d4ff);
+  --text-primary: #e0f7fa;
+  --text-secondary: #b2ebf2;
+  --border-light: rgba(255, 255, 255, 0.1);
+  --border-medium: rgba(255, 255, 255, 0.2);
+  --border-dark: rgba(255, 255, 255, 0.3);
+  --current-day-bg: rgba(0, 0, 0, 0.4);
+  --hover-bg: rgba(255, 255, 255, 0.1);
+  --color-green: #00e5ff;
+  --color-green-light: rgba(0, 229, 255, 0.2);
+  --color-red: #ff5252;
+  --color-gray: rgba(0, 0, 0, 0.2);
+  --header-bg: rgba(10, 25, 47, 0.9);
+  --cell-bg: rgba(10, 25, 47, 0.6);
+  --category-bg: rgba(10, 25, 47, 0.8);
+  --checkbox-missed-bg: rgba(255, 82, 82, 0.2);
+  --today-text: #00e5ff;
+  --today-border: #00e5ff;
+  --dropdown-bg: #0a192f;
+}
+
+[data-theme="forest"] {
+  --bg-color: rgba(240, 250, 240, 0.9);
+  --bg-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54.627 0l.83.83L60 5.373v54.627h-54.627L0 54.627V0h54.627zM29.172 30l-4.586-4.586-4.586 4.586 4.586 4.586 4.586-4.586zm10 10l-4.586-4.586-4.586 4.586 4.586 4.586 4.586-4.586zm10 10l-4.586-4.586-4.586 4.586 4.586 4.586 4.586-4.586zM30 10.828l-4.586-4.586L20.828 10.828 25.414 15.414 30 10.828zm-10 10l-4.586-4.586L10.828 20.828 15.414 25.414 20 20.828zm-10 10l-4.586-4.586L.828 30.828 5.414 35.414 10 30.828z' fill='%23228b22' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E"), linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+  --text-primary: #143601;
+  --text-secondary: #2b580c;
+  --border-light: rgba(255, 255, 255, 0.5);
+  --border-medium: rgba(34, 139, 34, 0.2);
+  --border-dark: rgba(34, 139, 34, 0.4);
+  --current-day-bg: rgba(255, 255, 255, 0.9);
+  --hover-bg: rgba(255, 255, 255, 0.5);
+  --color-green: #2e7d32;
+  --color-green-light: rgba(46, 125, 50, 0.2);
+  --color-red: #c62828;
+  --color-gray: rgba(255, 255, 255, 0.6);
+  --header-bg: rgba(255, 255, 255, 0.7);
+  --cell-bg: rgba(255, 255, 255, 0.4);
+  --category-bg: rgba(255, 255, 255, 0.6);
+  --checkbox-missed-bg: rgba(198, 40, 40, 0.1);
+  --today-text: #2e7d32;
+  --today-border: #2e7d32;
+  --dropdown-bg: #f1f8e9;
+}
+
+[data-theme="synthwave"] {
+  --bg-color: rgba(36, 11, 54, 0.85);
+  --bg-image: linear-gradient(transparent 95%, #ff00ff 100%), linear-gradient(90deg, transparent 95%, #ff00ff 100%), linear-gradient(to bottom, #240b36, #c31432);
+  background-size: 40px 40px, 40px 40px, 100% 100%;
+  --text-primary: #00ffff;
+  --text-secondary: #ff00ff;
+  --border-light: rgba(0, 255, 255, 0.2);
+  --border-medium: rgba(255, 0, 255, 0.3);
+  --border-dark: #00ffff;
+  --current-day-bg: rgba(0, 0, 0, 0.6);
+  --hover-bg: rgba(255, 0, 255, 0.2);
+  --color-green: #00ff00;
+  --color-green-light: rgba(0, 255, 0, 0.2);
+  --color-red: #ff0000;
+  --color-gray: rgba(0, 0, 0, 0.4);
+  --header-bg: rgba(36, 11, 54, 0.9);
+  --cell-bg: rgba(0, 0, 0, 0.5);
+  --category-bg: rgba(36, 11, 54, 0.8);
+  --checkbox-missed-bg: rgba(255, 0, 0, 0.3);
+  --today-text: #00ff00;
+  --today-border: #00ff00;
+  --dropdown-bg: #1a0826;
+}
+
+[data-theme="sakura"] {
+  --bg-color: rgba(255, 245, 248, 0.85);
+  --bg-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M20 0c0 11.046-8.954 20-20 20 11.046 0 20 8.954 20 20 0-11.046 8.954-20 20-20-11.046 0-20-8.954-20-20z' fill='%23ffb7b2' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E"), linear-gradient(to bottom right, #fbc2eb 0%, #a6c1ee 100%);
+  --text-primary: #5c3a4a;
+  --text-secondary: #8c6b7a;
+  --border-light: rgba(255, 255, 255, 0.6);
+  --border-medium: rgba(255, 183, 178, 0.4);
+  --border-dark: #ffb7b2;
+  --current-day-bg: rgba(255, 255, 255, 0.95);
+  --hover-bg: rgba(255, 255, 255, 0.6);
+  --color-green: #e05297;
+  --color-green-light: rgba(224, 82, 151, 0.2);
+  --color-red: #f25278;
+  --color-gray: rgba(255, 255, 255, 0.7);
+  --header-bg: rgba(255, 245, 248, 0.9);
+  --cell-bg: rgba(255, 255, 255, 0.5);
+  --category-bg: rgba(255, 245, 248, 0.8);
+  --checkbox-missed-bg: rgba(242, 82, 120, 0.1);
+  --today-text: #e05297;
+  --today-border: #e05297;
+  --dropdown-bg: #fff0f5;
+}
+
+[data-theme="galaxy"] {
+  --bg-color: rgba(15, 12, 41, 0.85);
+  --bg-image: radial-gradient(circle at 15% 50%, rgba(255, 255, 255, 0.08), transparent 25%), radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.08), transparent 25%), url("data:image/svg+xml,%3Csvg width='100' height='100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='1' fill='%23ffffff' fill-opacity='0.3'/%3E%3Ccircle cx='40' cy='60' r='1.5' fill='%23ffffff' fill-opacity='0.4'/%3E%3Ccircle cx='80' cy='20' r='0.5' fill='%23ffffff' fill-opacity='0.2'/%3E%3Ccircle cx='70' cy='80' r='1' fill='%23ffffff' fill-opacity='0.5'/%3E%3C/svg%3E"), linear-gradient(to right, #0f0c29, #302b63, #24243e);
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --border-light: rgba(255, 255, 255, 0.1);
+  --border-medium: rgba(255, 255, 255, 0.2);
+  --border-dark: rgba(255, 255, 255, 0.3);
+  --current-day-bg: rgba(0, 0, 0, 0.5);
+  --hover-bg: rgba(255, 255, 255, 0.1);
+  --color-green: #c084fc;
+  --color-green-light: rgba(192, 132, 252, 0.2);
+  --color-red: #fb7185;
+  --color-gray: rgba(0, 0, 0, 0.3);
+  --header-bg: rgba(15, 12, 41, 0.9);
+  --cell-bg: rgba(0, 0, 0, 0.4);
+  --category-bg: rgba(15, 12, 41, 0.8);
+  --checkbox-missed-bg: rgba(251, 113, 133, 0.2);
+  --today-text: #e879f9;
+  --today-border: #e879f9;
+  --dropdown-bg: #1e1b4b;
+}
+
+[data-theme="coffee"] {
+  --bg-color: rgba(243, 234, 222, 0.9);
+  --bg-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E"), linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+  --text-primary: #3e2723;
+  --text-secondary: #5d4037;
+  --border-light: rgba(255, 255, 255, 0.6);
+  --border-medium: rgba(109, 76, 65, 0.2);
+  --border-dark: rgba(109, 76, 65, 0.4);
+  --current-day-bg: rgba(255, 255, 255, 0.95);
+  --hover-bg: rgba(255, 255, 255, 0.6);
+  --color-green: #6d4c41;
+  --color-green-light: rgba(109, 76, 65, 0.2);
+  --color-red: #d84315;
+  --color-gray: rgba(255, 255, 255, 0.7);
+  --header-bg: rgba(243, 234, 222, 0.8);
+  --cell-bg: rgba(255, 255, 255, 0.5);
+  --category-bg: rgba(243, 234, 222, 0.7);
+  --checkbox-missed-bg: rgba(216, 67, 21, 0.1);
+  --today-text: #4e342e;
+  --today-border: #4e342e;
+  --dropdown-bg: #efebe9;
+}
+
+[data-theme="blueprint"] {
+  --bg-color: rgba(25, 84, 166, 0.85);
+  --bg-image: linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px);
+  background-size: 20px 20px, 20px 20px, 100px 100px, 100px 100px;
+  background-color: #1954a6;
+  --text-primary: #ffffff;
+  --text-secondary: #b3d4ff;
+  --border-light: rgba(255, 255, 255, 0.2);
+  --border-medium: rgba(255, 255, 255, 0.4);
+  --border-dark: rgba(255, 255, 255, 0.6);
+  --current-day-bg: rgba(0, 0, 0, 0.3);
+  --hover-bg: rgba(255, 255, 255, 0.1);
+  --color-green: #ffffff;
+  --color-green-light: rgba(255, 255, 255, 0.2);
+  --color-red: #ff8a65;
+  --color-gray: rgba(0, 0, 0, 0.2);
+  --header-bg: rgba(25, 84, 166, 0.95);
+  --cell-bg: rgba(0, 0, 0, 0.1);
+  --category-bg: rgba(25, 84, 166, 0.9);
+  --checkbox-missed-bg: rgba(255, 138, 101, 0.3);
+  --today-text: #ffffff;
+  --today-border: #ffffff;
+  --dropdown-bg: #154385;
+}
+
+[data-theme="minimal-dots"] {
+  --bg-color: rgba(255, 255, 255, 0.9);
+  --bg-image: radial-gradient(#d1d5db 1.5px, transparent 1.5px);
+  background-size: 20px 20px;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --border-light: rgba(243, 244, 246, 0.8);
+  --border-medium: rgba(229, 231, 235, 0.8);
+  --border-dark: rgba(209, 213, 219, 0.8);
+  --current-day-bg: rgba(255, 255, 255, 0.9);
+  --hover-bg: rgba(249, 250, 251, 0.8);
+  --color-green: #111827;
+  --color-green-light: rgba(229, 231, 235, 0.5);
+  --color-red: #ef4444;
+  --color-gray: rgba(243, 244, 246, 0.8);
+  --header-bg: rgba(255, 255, 255, 0.9);
+  --cell-bg: rgba(255, 255, 255, 0.7);
+  --category-bg: rgba(255, 255, 255, 0.8);
+  --checkbox-missed-bg: rgba(254, 242, 242, 0.8);
+  --today-text: #000000;
+  --today-border: #000000;
+  --dropdown-bg: #ffffff;
+}
+
+[data-theme="holographic"] {
+  --bg-color: rgba(245, 245, 250, 0.8);
+  --bg-image: conic-gradient(from 180deg at 50% 50%, #2a8af6 0deg, #a853ba 180deg, #e92a67 360deg), radial-gradient(circle at 100% 0%, #00d2ff 0%, #3a7bd5 100%);
+  background-blend-mode: screen;
+  --text-primary: #1a1a2e;
+  --text-secondary: #4a4e69;
+  --border-light: rgba(255, 255, 255, 0.5);
+  --border-medium: rgba(255, 255, 255, 0.3);
+  --border-dark: rgba(255, 255, 255, 0.6);
+  --current-day-bg: rgba(255, 255, 255, 0.9);
+  --hover-bg: rgba(255, 255, 255, 0.4);
+  --color-green: #e92a67;
+  --color-green-light: rgba(233, 42, 103, 0.2);
+  --color-red: #ff4b2b;
+  --color-gray: rgba(255, 255, 255, 0.5);
+  --header-bg: rgba(245, 245, 250, 0.85);
+  --cell-bg: rgba(255, 255, 255, 0.3);
+  --category-bg: rgba(245, 245, 250, 0.7);
+  --checkbox-missed-bg: rgba(255, 75, 43, 0.1);
+  --today-text: #2a8af6;
+  --today-border: #2a8af6;
+  --dropdown-bg: #ffffff;
 }
 

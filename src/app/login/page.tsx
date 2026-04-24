@@ -59,6 +59,8 @@ export default function LoginPage() {
     const formData = new FormData();
     formData.append('email', email);
     formData.append('code', code);
+    // Send client timezone to the server for analytics
+    formData.append('timezone', Intl.DateTimeFormat().resolvedOptions().timeZone);
 
     const result = await verifyOtp(formData);
 

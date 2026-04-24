@@ -2,6 +2,10 @@ import { google } from 'googleapis';
 import { oauth2Client, getStoredTokens, saveTokens } from '@/utils/googleAuth';
 import { NextResponse } from 'next/server';
 import { getSession } from '@/utils/auth';
+import { trackEvent } from '@/utils/trackEvent';
+import { db } from '@/db';
+import { calendarTaskLog } from '@/db/schema';
+import { sql } from 'drizzle-orm';
 
 async function getUser() {
   const session = await getSession();
@@ -12,10 +16,15 @@ async function getUser() {
 export async function GET() {
   try {
     const user = await getUser();
-    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!user) {
+      console.log('Calendar API: No user in session');
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
+    console.log(`Calendar API: Fetching tokens for user ${user.id}`);
     const tokens = await getStoredTokens(user.id);
     if (!tokens) {
+      console.log(`Calendar API: No tokens found for user ${user.id}`);
       return NextResponse.json({ authenticated: false, events: [] });
     }
 
@@ -45,6 +54,31 @@ export async function GET() {
     });
 
     const events = response.data.items || [];
+
+    // Log each calendar task into calendar_task_log (upsert)
+    for (const event of events) {
+      if (!event.id || !event.summary) continue;
+      db.insert(calendarTaskLog).values({
+        userId: user.id,
+        googleEventId: event.id,
+        summary: event.summary || 'Untitled',
+        scheduledStart: event.start?.dateTime ? new Date(event.start.dateTime) : null,
+        scheduledEnd: event.end?.dateTime ? new Date(event.end.dateTime) : null,
+        isCompleted: event.summary?.startsWith('✅') || false,
+        firstSeenAt: now,
+        lastSeenAt: now,
+      }).onConflictDoUpdate({
+        target: [calendarTaskLog.userId, calendarTaskLog.googleEventId],
+        set: {
+          summary: event.summary || 'Untitled',
+          lastSeenAt: now,
+          isCompleted: event.summary?.startsWith('✅') || false,
+        },
+      }).catch((e) => console.error('Failed to upsert calendar task:', e));
+    }
+
+    // Track fetch event
+    trackEvent(user.id, 'calendar.tasks_fetched', null, { count: events.length });
     
     return NextResponse.json({ 
       authenticated: true, 
@@ -111,6 +145,40 @@ export async function PATCH(request: Request) {
       },
     });
 
+    // Track calendar task completion
+    const completedAt = new Date();
+    const scheduledEnd = event.data.end?.dateTime ? new Date(event.data.end.dateTime) : null;
+    const wasOnTime = scheduledEnd ? completedAt <= scheduledEnd : null;
+
+    trackEvent(user.id, 'calendar.task_completed', eventId, {
+      summary: newSummary,
+      completedAt: completedAt.toISOString(),
+      wasOnTime,
+    });
+
+    // Update calendar_task_log
+    db.insert(calendarTaskLog).values({
+      userId: user.id,
+      googleEventId: eventId,
+      summary: newSummary,
+      scheduledStart: event.data.start?.dateTime ? new Date(event.data.start.dateTime) : null,
+      scheduledEnd,
+      isCompleted: true,
+      completedAt,
+      wasOnTime,
+      firstSeenAt: completedAt,
+      lastSeenAt: completedAt,
+    }).onConflictDoUpdate({
+      target: [calendarTaskLog.userId, calendarTaskLog.googleEventId],
+      set: {
+        isCompleted: true,
+        completedAt,
+        wasOnTime,
+        summary: newSummary,
+        lastSeenAt: completedAt,
+      },
+    }).catch((e) => console.error('Failed to update calendar task log:', e));
+
     return NextResponse.json({ success: true, newSummary });
   } catch (error: any) {
     console.error('Error updating event:', error);
@@ -163,6 +231,28 @@ export async function POST(request: Request) {
     });
 
     const event = response.data;
+    
+    // Track calendar task creation
+    trackEvent(user.id, 'calendar.task_created', event.id || null, {
+      summary: event.summary,
+      scheduledStart: now.toISOString(),
+      scheduledEnd: end.toISOString(),
+    });
+
+    // Log to calendar_task_log
+    if (event.id) {
+      db.insert(calendarTaskLog).values({
+        userId: user.id,
+        googleEventId: event.id,
+        summary: event.summary || summary,
+        scheduledStart: now,
+        scheduledEnd: end,
+        isCompleted: false,
+        firstSeenAt: now,
+        lastSeenAt: now,
+      }).catch((e) => console.error('Failed to log calendar task creation:', e));
+    }
+
     return NextResponse.json({ 
       success: true, 
       event: {

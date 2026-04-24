@@ -75,6 +75,8 @@
   flex-direction: column;
   justify-content: center;
   gap: 4px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .goalTitle {
@@ -265,6 +267,8 @@
   position: sticky;
   left: 0;
   width: fit-content;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .categoryColor {
@@ -320,6 +324,13 @@
     display: flex;
     justify-content: center;
   }
+
+  /* Make sticky columns solid on mobile to prevent checkboxes from showing through translucent themes */
+  .goalName, 
+  .categoryContent, 
+  .headerRow .goalName {
+    background: var(--dropdown-bg) !important;
+  }
 }
 
 .userMenu {
@@ -356,7 +367,7 @@
   border-radius: 12px;
   padding: 8px;
   box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-  z-index: 100;
+  z-index: 2000;
   min-width: 160px;
   animation: dropdownFade 0.2s ease-out;
 }

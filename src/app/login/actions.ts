@@ -1,12 +1,14 @@
 'use server';
 
 import { db } from '@/db';
-import { otps, profiles, plans, categories, goals } from '@/db/schema';
-import { eq, and, gt } from 'drizzle-orm';
+import { otps, profiles, plans, categories, goals, userSessions, userActivity } from '@/db/schema';
+import { eq, and, gt, sql } from 'drizzle-orm';
 import { sendOtpEmail } from '@/utils/mail';
 import { createSession } from '@/utils/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+import { parseUserAgent, getClientIp, getCountryFromHeaders } from '@/utils/deviceInfo';
 
 export async function requestOtp(formData: FormData) {
   const email = formData.get('email') as string;
@@ -168,8 +170,63 @@ export async function verifyOtp(formData: FormData) {
       ]);
     }
 
-    // Create custom session
+    // ── Collect analytics data ─────────────────────────────────────────────
+    const requestHeaders = await headers();
+    const userAgent = requestHeaders.get('user-agent') || '';
+    const { deviceType, os, browser } = parseUserAgent(userAgent);
+    const ipAddress = getClientIp(requestHeaders);
+    const country = getCountryFromHeaders(requestHeaders);
+    const referrer = requestHeaders.get('referer') || null;
+
+    // Timezone comes from the form (client-side Intl.DateTimeFormat)
+    const timezone = (formData.get('timezone') as string) || 'UTC';
+
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+
+    // Create JWT session
     await createSession(profile.id);
+
+    // Save login session row
+    await db.insert(userSessions).values({
+      userId: profile.id,
+      loggedInAt: now,
+      ipAddress,
+      userAgent,
+      deviceType,
+      os,
+      browser,
+      country,
+      timezone,
+      referrer,
+    }).catch((e) => console.error('Failed to save user session:', e));
+
+    // Update profile analytics
+    await db.update(profiles).set({
+      lastLoginAt: now,
+      lastSeenAt: now,
+      loginCount: sql`${profiles.loginCount} + 1`,
+      timezone,
+      ...(country ? { country } : {}),
+    }).where(eq(profiles.id, profile.id))
+      .catch((e) => console.error('Failed to update profile analytics:', e));
+
+    // Upsert daily activity – count this login as a session on this day
+    await db.insert(userActivity).values({
+      userId: profile.id,
+      activityDate: todayStr,
+      firstActiveAt: now,
+      lastActiveAt: now,
+      pageViews: 0,
+      goalsChecked: 0,
+      sessionsOnDay: 1,
+    }).onConflictDoUpdate({
+      target: [userActivity.userId, userActivity.activityDate],
+      set: {
+        lastActiveAt: now,
+        sessionsOnDay: sql`${userActivity.sessionsOnDay} + 1`,
+      },
+    }).catch((e) => console.error('Failed to upsert user activity:', e));
 
     // Delete used OTP
     await db.delete(otps).where(eq(otps.email, email));
@@ -184,7 +241,13 @@ export async function verifyOtp(formData: FormData) {
 }
 
 export async function logout() {
-  const { deleteSession } = await import('@/utils/auth');
+  // Track session end before destroying the session
+  const { getSession, deleteSession } = await import('@/utils/auth');
+  const session = await getSession();
+  if (session?.userId) {
+    const { trackEvent } = await import('@/utils/trackEvent');
+    trackEvent(session.userId, 'session.ended');
+  }
   await deleteSession();
   revalidatePath('/', 'layout');
   redirect('/login');
