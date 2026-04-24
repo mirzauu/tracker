@@ -197,19 +197,10 @@ export default function CalendarTasks() {
   }
 
   if (!authenticated) {
-    return (
-      <div className="calendar-panel auth-needed">
-        <h3>Google Calendar</h3>
-        <p>Connect your calendar to see today's tasks.</p>
-        <button 
-          onClick={() => window.location.href = '/api/auth/google'}
-          className="connect-button"
-        >
-          Connect Google Calendar
-        </button>
-      </div>
-    );
+    return null;
   }
+
+
 
   const panelStyle = (!isMobile && position) 
     ? { 
@@ -431,20 +422,72 @@ export default function CalendarTasks() {
           font-size: 14px;
         }
 
-        .connect-button {
-          background: #4285F4;
-          color: white;
-          border: none;
-          padding: 10px 16px;
-          border-radius: 6px;
-          font-weight: 600;
-          cursor: pointer;
-          width: 100%;
-          margin-top: 12px;
-        }
-
         .auth-needed {
           text-align: center;
+          padding: 30px 20px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .auth-icon {
+          background: var(--color-green-light);
+          width: 80px;
+          height: 80px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 8px;
+          animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+
+        .auth-needed h3 {
+          font-size: 20px;
+          margin: 0;
+          color: var(--text-primary);
+        }
+
+        .auth-needed p {
+          font-size: 14px;
+          color: var(--text-secondary);
+          line-height: 1.5;
+          margin: 0 0 12px 0;
+        }
+
+        .connect-button {
+          background: white;
+          color: #3c4043;
+          border: 1px solid var(--border-medium);
+          padding: 10px 24px;
+          border-radius: 24px;
+          font-weight: 500;
+          font-size: 14px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          width: 100%;
+          transition: all 0.2s;
+          box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
+        }
+
+        .connect-button:hover {
+          background: #f8f9fa;
+          box-shadow: 0 1px 3px rgba(60, 64, 67, 0.3), 0 4px 8px 3px rgba(60, 64, 67, 0.15);
+          border-color: transparent;
+        }
+
+        .connect-button:active {
+          background: #f1f3f4;
+          box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3), 0 1px 3px 1px rgba(60, 64, 67, 0.15);
         }
 
         .loading {

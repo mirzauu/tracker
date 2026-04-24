@@ -83,6 +83,15 @@ export async function PATCH(request: Request) {
     }
     oauth2Client.setCredentials(tokens);
 
+    // Refresh token if expired
+    if (tokens.expiry_date && tokens.expiry_date <= Date.now()) {
+      const refreshed = await oauth2Client.refreshAccessToken();
+      const updatedTokens = { ...tokens, ...refreshed.credentials };
+      await saveTokens(user.id, updatedTokens);
+      oauth2Client.setCredentials(updatedTokens);
+    }
+
+
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     
     const event = await calendar.events.get({
@@ -129,6 +138,15 @@ export async function POST(request: Request) {
     }
 
     oauth2Client.setCredentials(tokens);
+
+    // Refresh token if expired
+    if (tokens.expiry_date && tokens.expiry_date <= Date.now()) {
+      const refreshed = await oauth2Client.refreshAccessToken();
+      const updatedTokens = { ...tokens, ...refreshed.credentials };
+      await saveTokens(user.id, updatedTokens);
+      oauth2Client.setCredentials(updatedTokens);
+    }
+
 
     const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
     

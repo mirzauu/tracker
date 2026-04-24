@@ -29,8 +29,11 @@ export async function requestOtp(formData: FormData) {
     
     return { success: 'OTP sent to your email', email };
   } catch (error) {
-    console.error('Error sending OTP:', error);
-    return { error: 'Failed to send OTP' };
+    console.error('Error in requestOtp:', error);
+    if (error instanceof Error && (error.message.includes('ECONNREFUSED') || error.message.includes('connection refused'))) {
+      return { error: 'Database connection failed. Please check your DATABASE_URL.' };
+    }
+    return { error: 'Failed to send OTP. Please check your configuration (Database/Email).' };
   }
 }
 
