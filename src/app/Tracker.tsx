@@ -5,6 +5,7 @@ import Link from 'next/link';
 import styles from './page.module.css';
 import { updateUserTimezone } from './actions';
 import CalendarTasks from '@/components/CalendarTasks';
+import DailyProgressChart from '@/components/DailyProgressChart';
 
 
 type GoalType = 'daily' | 'weekly' | 'monthly';
@@ -637,6 +638,9 @@ export default function HabitTracker({ initialGoals, initialLogs }: TrackerProps
         ))}
         </div>
       </div>
+
+      {/* Daily Progress Chart */}
+      <DailyProgressChart />
 
       {popover && (
         <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'white', padding: '24px', borderRadius: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)', zIndex: 100, border: '1px solid var(--border-medium)' }}>
